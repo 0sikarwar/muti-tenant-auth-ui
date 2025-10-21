@@ -42,8 +42,8 @@ export function RegisterForm() {
     if (!tenant) {
         toast({
             variant: 'destructive',
-            title: 'Tenant Error',
-            description: 'A tenant must be selected for registration.',
+            title: 'No Tenant Found',
+            description: 'Could not find a tenant for registration.',
         });
         return;
     }

@@ -21,7 +21,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTenant } from '@/hooks/useTenant';
 import { loginSchema } from '@/lib/validation';
 import { useToast } from '@/hooks/use-toast';
-import TenantSelector from '@/components/auth/TenantSelector';
 
 export function LoginForm() {
   const router = useRouter();
@@ -41,8 +40,8 @@ export function LoginForm() {
     if (!tenant) {
       toast({
         variant: 'destructive',
-        title: 'Tenant Not Selected',
-        description: 'Please select a tenant before logging in.',
+        title: 'No Tenant Found',
+        description: 'Could not find a tenant to log into.',
       });
       return;
     }
@@ -65,7 +64,6 @@ export function LoginForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <TenantSelector />
         <FormField
           control={form.control}
           name="email"
