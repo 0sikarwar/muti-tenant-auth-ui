@@ -1,5 +1,4 @@
-
-export type Role = 'Super Admin' | 'Admin' | 'User';
+export type Role = "admin" | "manager" | "user";
 
 export interface User {
   id: string;
@@ -10,7 +9,7 @@ export interface User {
   avatar?: string;
   phone?: string;
   address?: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   profile_image_url?: string;
 }
 

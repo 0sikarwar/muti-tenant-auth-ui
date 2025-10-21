@@ -1,26 +1,18 @@
+"use client";
 
-'use client';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { useAuth } from '@/hooks/useAuth';
-import { registerSchema } from '@/lib/validation';
-import { useToast } from '@/hooks/use-toast';
-import { useTenant } from '@/hooks/useTenant';
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
+import { registerSchema } from "@/lib/validation";
+import { useToast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -31,34 +23,34 @@ export function RegisterForm() {
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof registerSchema>) {
-    if (!tenant) {
-        toast({
-            variant: 'destructive',
-            title: 'No Tenant Found',
-            description: 'Could not find a tenant for registration.',
-        });
-        return;
-    }
-    const success = await register(values.name, values.email, values.password, tenant.id);
+    // if (!tenant) {
+    //     toast({
+    //         variant: 'destructive',
+    //         title: 'No Tenant Found',
+    //         description: 'Could not find a tenant for registration.',
+    //     });
+    //     return;
+    // }
+    const success = await register(values.name, values.email, values.password);
     if (success) {
       toast({
-        title: 'Registration Successful',
-        description: 'Your account has been created.',
+        title: "Registration Successful",
+        description: "Your account has been created.",
       });
-      router.push('/dashboard');
+      router.push("/dashboard");
     } else {
       toast({
-        variant: 'destructive',
-        title: 'Registration Failed',
-        description: 'An account with this email may already exist.',
+        variant: "destructive",
+        title: "Registration Failed",
+        description: "An account with this email may already exist.",
       });
     }
   }
@@ -122,7 +114,7 @@ export function RegisterForm() {
           Create account
         </Button>
         <div className="mt-4 text-center text-sm">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <Link href="/login" className="underline">
             Login
           </Link>

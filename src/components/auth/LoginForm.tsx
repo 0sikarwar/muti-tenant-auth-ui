@@ -1,62 +1,45 @@
+"use client";
 
-'use client';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { useAuth } from '@/hooks/useAuth';
-import { useTenant } from '@/hooks/useTenant';
-import { loginSchema } from '@/lib/validation';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
+import { useTenant } from "@/hooks/useTenant";
+import { loginSchema } from "@/lib/validation";
+import { useToast } from "@/hooks/use-toast";
 
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
-  const { tenant } = useTenant();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
-    if (!tenant) {
-      toast({
-        variant: 'destructive',
-        title: 'No Tenant Found',
-        description: 'Could not find a tenant to log into.',
-      });
-      return;
-    }
-    const success = await login(values.email, tenant.id);
+    const success = await login(values.email, values.password);
     if (success) {
       toast({
-        title: 'Login Successful',
-        description: 'Welcome back!',
+        title: "Login Successful",
+        description: "Welcome back!",
       });
-      router.push('/dashboard');
+      router.push("/dashboard");
     } else {
       toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: 'Invalid email or password for this tenant.',
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Invalid email or password ",
       });
     }
   }
@@ -96,7 +79,7 @@ export function LoginForm() {
           </Button>
         </div>
         <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{' '}
+          Don&apos;t have an account?{" "}
           <Link href="/register" className="underline">
             Register
           </Link>

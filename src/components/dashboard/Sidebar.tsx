@@ -1,13 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import {
-  Users,
-  Building,
-  LayoutDashboard,
-  UserCircle,
-} from 'lucide-react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Users, Building, LayoutDashboard, UserCircle } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,15 +10,15 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-} from '@/components/ui/sidebar';
-import { Logo } from '@/components/shared/Logo';
-import { useAuth } from '@/hooks/useAuth';
+} from "@/components/ui/sidebar";
+import { Logo } from "@/components/shared/Logo";
+import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiredRole: 'User' },
-  { href: '/dashboard/profile', label: 'Profile', icon: UserCircle, requiredRole: 'User' },
-  { href: '/dashboard/users', label: 'User Management', icon: Users, requiredRole: 'Admin' },
-  { href: '/dashboard/tenants', label: 'Tenant Management', icon: Building, requiredRole: 'Super Admin' },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requiredRole: "user" },
+  { href: "/dashboard/profile", label: "Profile", icon: UserCircle, requiredRole: "user" },
+  { href: "/dashboard/users", label: "User Management", icon: Users, requiredRole: "manager" },
+  { href: "/dashboard/tenants", label: "Tenant Management", icon: Building, requiredRole: "admin" },
 ];
 
 export function DashboardSidebar() {
@@ -41,10 +36,7 @@ export function DashboardSidebar() {
             hasPermission(item.requiredRole) ? (
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href} legacyBehavior passHref>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    tooltip={{ children: item.label }}
-                  >
+                  <SidebarMenuButton isActive={pathname === item.href} tooltip={{ children: item.label }}>
                     <item.icon />
                     <span>{item.label}</span>
                   </SidebarMenuButton>

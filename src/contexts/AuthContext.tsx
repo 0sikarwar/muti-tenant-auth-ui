@@ -1,31 +1,33 @@
+"use client";
 
-'use client';
-
-import type { ReactNode } from 'react';
-import { createContext, useEffect, useState } from 'react';
-import type { User, Role } from '@/lib/types';
-import { useRouter } from 'next/navigation';
-import * as api from '@/lib/api';
+import type { ReactNode } from "react";
+import { createContext, useEffect, useState } from "react";
+import type { User, Role } from "@/lib/types";
+import { useRouter } from "next/navigation";
+import * as api from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, tenantId: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  register: (name: string, email: string, password: string, tenantId: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string) => Promise<boolean>;
   hasPermission: (requiredRole: Role) => boolean;
   loading: boolean;
   token: string | null;
+  refreshToken: string | null;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-const USER_STORAGE_KEY = 'tenantverse-user';
-const TOKEN_STORAGE_KEY = 'tenantverse-token';
+const USER_STORAGE_KEY = "user";
+const TOKEN_STORAGE_KEY = "auth-token";
+const REFRESH_TOKEN_STORAGE_KEY = "refresh-auth-token";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -33,79 +35,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
       const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
-      if (storedUser && storedToken) {
+      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+      if (storedUser && storedToken && refreshToken) {
         setUser(JSON.parse(storedUser));
         setToken(storedToken);
+        setRefreshToken(storedRefreshToken);
       }
     } catch (error) {
-      console.error('Failed to parse user from localStorage', error);
+      console.error("Failed to parse user from localStorage", error);
       localStorage.removeItem(USER_STORAGE_KEY);
       localStorage.removeItem(TOKEN_STORAGE_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
     }
     setLoading(false);
   }, []);
 
-  const login = async (email: string, tenantId: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const { user: loggedInUser, token: authToken } = await api.login(email, tenantId);
-      if (loggedInUser && authToken) {
+      const resp = await api.login(email, password);
+      console.log("resp", resp);
+      const { user: loggedInUser, accessToken, refreshToken: refToken } = resp;
+      if (loggedInUser && accessToken) {
         setUser(loggedInUser);
-        setToken(authToken);
+        setToken(accessToken);
+        setRefreshToken(refToken);
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(loggedInUser));
-        localStorage.setItem(TOKEN_STORAGE_KEY, authToken);
+        localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refToken);
         return true;
       }
       return false;
     } catch (error) {
-      console.error('Login failed', error);
+      console.error("Login failed", error);
       return false;
     }
   };
 
   const logout = async () => {
-    if (token) {
-        try {
-            await api.logout(token);
-        } catch (error) {
-            console.error('Logout API call failed', error);
-        }
+    if (token && refreshToken) {
+      try {
+        await api.logout(token);
+      } catch (error) {
+        console.error("Logout API call failed", error);
+      }
     }
     setUser(null);
     setToken(null);
     localStorage.removeItem(USER_STORAGE_KEY);
     localStorage.removeItem(TOKEN_STORAGE_KEY);
-    router.push('/login');
+    localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+    router.push("/login");
   };
 
-  const register = async (name: string, email: string, password: string, tenantId: string): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-        const { user: newUser, token: authToken } = await api.register(name, email, password, tenantId);
-        if (newUser && authToken) {
-            setUser(newUser);
-            setToken(authToken);
-            localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(newUser));
-            localStorage.setItem(TOKEN_STORAGE_KEY, authToken);
-            return true;
-        }
-        return false;
+      const { user: newUser, accessToken, refreshToken: refToken } = await api.register(name, email, password);
+      if (newUser && accessToken) {
+        setUser(newUser);
+        setToken(accessToken);
+        setRefreshToken(refToken);
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(newUser));
+        localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refToken);
+        return true;
+      }
+      return false;
     } catch (error) {
-        console.error('Registration failed', error);
-        return false;
+      console.error("Registration failed", error);
+      return false;
     }
   };
-  
+
   const hasPermission = (requiredRole: Role): boolean => {
     if (!user) return false;
     const roleHierarchy: { [key in Role]: number } = {
-      'User': 1,
-      'Admin': 2,
-      'Super Admin': 3,
+      user: 1,
+      manager: 2,
+      admin: 3,
     };
     return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, register, hasPermission, loading, token }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated: !!user, login, logout, register, hasPermission, loading, token, refreshToken }}
+    >
       {children}
     </AuthContext.Provider>
   );
