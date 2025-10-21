@@ -1,5 +1,5 @@
 
-import type { Tenant, User, Role } from './types';
+import type { Tenant, User } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -23,6 +23,12 @@ async function fetchFromAPI(path: string, options: RequestInit = {}) {
 // Tenant APIs
 export const getTenants = (): Promise<Tenant[]> => fetchFromAPI('/tenants');
 export const getTenantById = (id: string): Promise<Tenant> => fetchFromAPI(`/tenants/${id}`);
+export const createTenant = (name: string, token: string): Promise<Tenant> => fetchFromAPI('/tenants', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ name }),
+});
+
 
 // Auth APIs
 export const login = (email: string, tenantId: string) => fetchFromAPI('/auth/login', {
@@ -32,7 +38,12 @@ export const login = (email: string, tenantId: string) => fetchFromAPI('/auth/lo
 
 export const register = (name: string, email: string, password: string, tenantId: string) => fetchFromAPI('/auth/register', {
   method: 'POST',
-  body: JSON.stringify({ name, email, password, tenant_id: tenantId }),
+  body: JSON.stringify({ name, email, password, tenant_id: tenantId, role: 'User' }), // Defaulting role to 'User'
+});
+
+export const refreshToken = (token: string) => fetchFromAPI('/auth/refresh-token', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
 });
 
 export const forgotPassword = (email: string, tenantId: string) => fetchFromAPI('/auth/forgot-password', {
@@ -45,16 +56,23 @@ export const resetPassword = (token: string, password: string) => fetchFromAPI('
   body: JSON.stringify({ token, password }),
 });
 
-// User APIs
-export const getUsers = (tenantId: string): Promise<User[]> => fetchFromAPI(`/users?tenant_id=${tenantId}`);
-export const getUserById = (id: string): Promise<User> => fetchFromAPI(`/users/${id}`);
-
-export const updateUser = (id: string, data: Partial<User>): Promise<User> => fetchFromAPI(`/users/${id}`, {
-  method: 'PUT',
-  body: JSON.stringify(data),
+export const updateProfile = (data: Partial<User>, token: string): Promise<User> => fetchFromAPI('/auth/update-profile', {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify(data),
 });
 
-export const createUser = (data: Omit<User, 'id' | 'status' | 'avatar'>): Promise<User> => fetchFromAPI('/users', {
+export const logout = (token: string) => fetchFromAPI('/auth/logout', {
     method: 'POST',
-    body: JSON.stringify(data),
+    headers: { 'Authorization': `Bearer ${token}` },
+});
+
+
+// User APIs
+export const getUsers = (tenantId: string, token: string): Promise<User[]> => fetchFromAPI(`/users?tenant_id=${tenantId}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+});
+
+export const getUserById = (id: string, token: string): Promise<User> => fetchFromAPI(`/users/${id}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
 });

@@ -10,14 +10,14 @@ import { useEffect, useMemo, useState } from 'react';
 import * as api from '@/lib/api';
 
 export default function UserManagementPage() {
-  const { user, hasPermission } = useAuth();
+  const { user, token, hasPermission } = useAuth();
   const [allUsers, setAllUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    if (user?.tenantId) {
-      api.getUsers(user.tenantId).then(setAllUsers).catch(console.error);
+    if (user?.tenantId && token) {
+      api.getUsers(user.tenantId, token).then(setAllUsers).catch(console.error);
     }
-  }, [user?.tenantId]);
+  }, [user?.tenantId, token]);
   
   const visibleUsers = useMemo(() => {
     if (!user) return [];

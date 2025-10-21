@@ -46,7 +46,7 @@ export default function ProfilePage() {
   async function onSubmit(values: z.infer<typeof profileSchema>) {
     if (!user || !token) return;
     try {
-        await api.updateUser(user.id, values);
+        await api.updateProfile(values, token);
         toast({
             title: 'Profile Updated',
             description: 'Your personal information has been saved.',
