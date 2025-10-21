@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
@@ -14,9 +15,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import type { User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { tenants } from '@/lib/tenants';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useTenant } from '@/hooks/useTenant';
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -46,7 +46,6 @@ export const columns: ColumnDef<User>[] = [
     header: 'User',
     cell: ({ row }) => {
       const user = row.original;
-      const userAvatar = PlaceHolderImages.find((img) => img.id === user.avatar);
       const userInitials = user.name
         .split(' ')
         .map((n) => n[0])
@@ -54,7 +53,7 @@ export const columns: ColumnDef<User>[] = [
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
-            {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt={user.name} data-ai-hint={userAvatar.imageHint} />}
+            {user.profile_image_url && <AvatarImage src={user.profile_image_url} alt={user.name} />}
             <AvatarFallback>{userInitials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
@@ -73,6 +72,7 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: 'tenantId',
     header: 'Organization',
     cell: ({ row }) => {
+        const { tenants } = useTenant();
         const tenant = tenants.find(t => t.id === row.original.tenantId);
         return <span>{tenant?.name || 'N/A'}</span>
     }

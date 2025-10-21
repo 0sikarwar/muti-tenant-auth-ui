@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,11 +26,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { profileSchema } from '@/lib/validation';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Upload } from 'lucide-react';
+import * as api from '@/lib/api';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof profileSchema>>({
@@ -42,15 +43,23 @@ export default function ProfilePage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof profileSchema>) {
-    console.log(values);
-    toast({
-      title: 'Profile Updated',
-      description: 'Your personal information has been saved.',
-    });
+  async function onSubmit(values: z.infer<typeof profileSchema>) {
+    if (!user || !token) return;
+    try {
+        await api.updateUser(user.id, values);
+        toast({
+            title: 'Profile Updated',
+            description: 'Your personal information has been saved.',
+        });
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: 'Update Failed',
+            description: 'Could not update your profile.',
+        });
+    }
   }
 
-  const userAvatar = user ? PlaceHolderImages.find(img => img.id === user.avatar) : null;
   const userInitials = user?.name
     .split(' ')
     .map((n) => n[0])
@@ -76,7 +85,7 @@ export default function ProfilePage() {
             <CardContent className="space-y-6">
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
-                  {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt={user?.name} data-ai-hint={userAvatar.imageHint} />}
+                  {user?.profile_image_url && <AvatarImage src={user.profile_image_url} alt={user?.name} />}
                   <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
                 </Avatar>
                 <Button type="button" variant="outline">

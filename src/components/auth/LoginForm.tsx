@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,7 +37,7 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
+  async function onSubmit(values: z.infer<typeof loginSchema>) {
     if (!tenant) {
       toast({
         variant: 'destructive',
@@ -45,7 +46,7 @@ export function LoginForm() {
       });
       return;
     }
-    const success = login(values.email, tenant.id);
+    const success = await login(values.email, tenant.id);
     if (success) {
       toast({
         title: 'Login Successful',

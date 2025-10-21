@@ -1,9 +1,10 @@
+
 'use client';
 
 import type { ReactNode } from 'react';
 import { createContext, useEffect, useState, useCallback } from 'react';
 import type { Tenant, Theme } from '@/lib/types';
-import { tenants } from '@/lib/tenants';
+import * as api from '@/lib/api';
 
 interface TenantContextType {
   tenant: Tenant | null;
@@ -19,6 +20,7 @@ const TENANT_STORAGE_KEY = 'tenantverse-tenant';
 
 export function TenantProvider({ children }: { children: ReactNode }) {
   const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
 
   const applyTenantTheme = useCallback((theme: Theme) => {
@@ -42,21 +44,25 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   }, []);
   
   useEffect(() => {
-    try {
-      const storedTenantId = localStorage.getItem(TENANT_STORAGE_KEY);
-      const initialTenant = tenants.find(t => t.id === storedTenantId) || tenants[0];
-      setTenant(initialTenant);
-      if (initialTenant) {
-        applyTenantTheme(initialTenant.theme);
+    const fetchTenants = async () => {
+      try {
+        const fetchedTenants = await api.getTenants();
+        setTenants(fetchedTenants);
+        
+        const storedTenantId = localStorage.getItem(TENANT_STORAGE_KEY);
+        const initialTenant = fetchedTenants.find(t => t.id === storedTenantId) || fetchedTenants[0];
+        
+        if (initialTenant) {
+          setTenant(initialTenant);
+          applyTenantTheme(initialTenant.theme);
+        }
+      } catch (error) {
+        console.error("Failed to fetch tenants", error);
       }
-    } catch (error) {
-      console.error("Failed to initialize tenant from localStorage", error);
-      setTenant(tenants[0]);
-      if(tenants[0]) {
-        applyTenantTheme(tenants[0].theme);
-      }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    fetchTenants();
   }, [applyTenantTheme]);
 
   const selectTenant = (tenantId: string) => {

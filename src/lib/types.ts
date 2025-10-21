@@ -1,3 +1,4 @@
+
 export type Role = 'Super Admin' | 'Admin' | 'User';
 
 export interface User {
@@ -6,10 +7,11 @@ export interface User {
   email: string;
   role: Role;
   tenantId: string;
-  avatar: string;
+  avatar?: string;
   phone?: string;
   address?: string;
   status: 'active' | 'inactive';
+  profile_image_url?: string;
 }
 
 export interface Theme {
@@ -28,7 +30,7 @@ export interface Theme {
 export interface Tenant {
   id: string;
   name: string;
-  logoUrlId: string;
+  logoUrl?: string;
   description: string;
   theme: Theme;
 }

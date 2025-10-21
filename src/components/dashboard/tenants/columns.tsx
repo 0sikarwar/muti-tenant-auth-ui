@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
@@ -11,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Tenant } from '@/lib/types';
-import { Logo } from '@/components/shared/Logo';
 import { Checkbox } from '@/components/ui/checkbox';
 
 export const columns: ColumnDef<Tenant>[] = [

@@ -1,15 +1,23 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { UserTable } from '@/components/dashboard/users/UserTable';
 import { useAuth } from '@/hooks/useAuth';
-import { users as allUsers } from '@/lib/users';
 import type { User } from '@/lib/types';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import * as api from '@/lib/api';
 
 export default function UserManagementPage() {
   const { user, hasPermission } = useAuth();
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    if (user?.tenantId) {
+      api.getUsers(user.tenantId).then(setAllUsers).catch(console.error);
+    }
+  }, [user?.tenantId]);
   
   const visibleUsers = useMemo(() => {
     if (!user) return [];
@@ -20,7 +28,7 @@ export default function UserManagementPage() {
         return allUsers.filter((u: User) => u.tenantId === user.tenantId);
     }
     return [];
-  }, [user, hasPermission]);
+  }, [user, hasPermission, allUsers]);
 
 
   return (

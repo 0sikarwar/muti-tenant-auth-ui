@@ -1,8 +1,8 @@
+
 'use client';
 
 import Image from 'next/image';
 import { useTenant } from '@/hooks/useTenant';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function Logo({ className }: { className?: string }) {
@@ -12,18 +12,15 @@ export function Logo({ className }: { className?: string }) {
     return <Skeleton className="h-10 w-32" />;
   }
 
-  const logoImage = PlaceHolderImages.find(img => img.id === tenant.logoUrlId);
-
   return (
     <div className={`relative h-10 w-32 ${className}`}>
-      {logoImage ? (
+      {tenant.logoUrl ? (
         <Image
-          src={logoImage.imageUrl}
+          src={tenant.logoUrl}
           alt={`${tenant.name} Logo`}
           fill
           sizes="128px"
           style={{ objectFit: 'contain' }}
-          data-ai-hint={logoImage.imageHint}
           priority
         />
       ) : (

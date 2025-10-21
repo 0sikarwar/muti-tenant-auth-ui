@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -14,7 +15,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '../ui/skeleton';
 
 export function UserMenu() {
@@ -28,7 +28,6 @@ export function UserMenu() {
     return null;
   }
   
-  const userAvatar = PlaceHolderImages.find(img => img.id === user.avatar);
   const userInitials = user.name
     .split(' ')
     .map((n) => n[0])
@@ -39,7 +38,7 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt={user.name} data-ai-hint={userAvatar.imageHint} />}
+            {user.profile_image_url && <AvatarImage src={user.profile_image_url} alt={user.name} />}
             <AvatarFallback>{userInitials}</AvatarFallback>
           </Avatar>
         </Button>

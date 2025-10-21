@@ -1,11 +1,21 @@
+
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/users/data-table';
-import { tenants } from '@/lib/tenants';
 import { columns } from '@/components/dashboard/tenants/columns';
+import { useEffect, useState } from 'react';
+import type { Tenant } from '@/lib/types';
+import * as api from '@/lib/api';
 
 
 export default function TenantManagementPage() {
+    const [tenants, setTenants] = useState<Tenant[]>([]);
+
+    useEffect(() => {
+        api.getTenants().then(setTenants).catch(console.error);
+    }, []);
 
   return (
     <div className="space-y-8">
