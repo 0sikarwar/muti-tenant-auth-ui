@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
       const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
       const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-      if (storedUser && storedToken && refreshToken) {
+      if (storedUser && storedToken && storedRefreshToken) {
         setUser(JSON.parse(storedUser));
         setToken(storedToken);
         setRefreshToken(storedRefreshToken);
@@ -74,13 +74,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     if (token && refreshToken) {
       try {
-        await api.logout(token);
+        await api.logout(token, refreshToken);
       } catch (error) {
         console.error("Logout API call failed", error);
       }
     }
     setUser(null);
     setToken(null);
+    setRefreshToken(null);
     localStorage.removeItem(USER_STORAGE_KEY);
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);

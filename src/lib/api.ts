@@ -1,14 +1,24 @@
 import type { Tenant, User } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const REFRESH_TOKEN_STORAGE_KEY = "refresh-auth-token";
 
 async function fetchFromAPI(path: string, options: RequestInit = {}) {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...options.headers,
+  };
+
+  if (typeof window !== "undefined") {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+    if (refreshToken) {
+      headers["x-refresh-token"] = refreshToken;
+    }
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -59,10 +69,11 @@ export const updateProfile = (data: Partial<User>, token: string): Promise<User>
     body: JSON.stringify(data),
   });
 
-export const logout = (token: string) =>
+export const logout = (token: string, refreshToken: string) =>
   fetchFromAPI("/auth/logout", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ refreshToken }),
   });
 
 // User APIs
