@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/shared/Logo";
 import { useAuth } from "@/hooks/useAuth";
+import { Role } from "@/lib/types";
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requiredRole: "user" },
@@ -33,7 +34,7 @@ export function DashboardSidebar() {
       <SidebarContent>
         <SidebarMenu>
           {menuItems.map((item) =>
-            hasPermission(item.requiredRole) ? (
+            hasPermission(item.requiredRole as Role) ? (
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href} legacyBehavior passHref>
                   <SidebarMenuButton isActive={pathname === item.href} tooltip={{ children: item.label }}>

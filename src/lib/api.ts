@@ -4,9 +4,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const REFRESH_TOKEN_STORAGE_KEY = "refresh-auth-token";
 
 async function fetchFromAPI(path: string, options: RequestInit = {}) {
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
 
   if (typeof window !== "undefined") {
