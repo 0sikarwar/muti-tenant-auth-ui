@@ -20,9 +20,9 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-const USER_STORAGE_KEY = "user";
-const TOKEN_STORAGE_KEY = "auth-token";
-const REFRESH_TOKEN_STORAGE_KEY = "refresh-auth-token";
+export const USER_STORAGE_KEY = "user";
+export const TOKEN_STORAGE_KEY = "auth-token";
+export const REFRESH_TOKEN_STORAGE_KEY = "refresh-auth-token";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

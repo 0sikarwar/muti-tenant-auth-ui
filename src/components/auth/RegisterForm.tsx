@@ -12,12 +12,10 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { registerSchema } from "@/lib/validation";
 import { useToast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
 
 export function RegisterForm() {
   const router = useRouter();
   const { register } = useAuth();
-  const { tenant } = useTenant();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -31,14 +29,6 @@ export function RegisterForm() {
   });
 
   async function onSubmit(values: z.infer<typeof registerSchema>) {
-    // if (!tenant) {
-    //     toast({
-    //         variant: 'destructive',
-    //         title: 'No Tenant Found',
-    //         description: 'Could not find a tenant for registration.',
-    //     });
-    //     return;
-    // }
     const success = await register(values.name, values.email, values.password);
     if (success) {
       toast({

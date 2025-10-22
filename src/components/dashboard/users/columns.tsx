@@ -1,9 +1,8 @@
+"use client";
 
-'use client';
-
-import type { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import type { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,22 +10,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import type { User } from '@/lib/types';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useTenant } from '@/hooks/useTenant';
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import type { User } from "@/lib/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const columns: ColumnDef<User>[] = [
   {
-    id: 'select',
+    id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
@@ -42,14 +37,14 @@ export const columns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'name',
-    header: 'User',
+    accessorKey: "name",
+    header: "User",
     cell: ({ row }) => {
       const user = row.original;
       const userInitials = user.name
-        .split(' ')
+        .split(" ")
         .map((n) => n[0])
-        .join('');
+        .join("");
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
@@ -65,32 +60,19 @@ export const columns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: 'role',
-    header: 'Role',
+    accessorKey: "role",
+    header: "Role",
   },
   {
-    accessorKey: 'tenantId',
-    header: 'Organization',
+    accessorKey: "status",
+    header: "Status",
     cell: ({ row }) => {
-        const { tenants } = useTenant();
-        const tenant = tenants.find(t => t.id === row.original.tenantId);
-        return <span>{tenant?.name || 'N/A'}</span>
-    }
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => {
-      const status = row.getValue('status') as string;
-      return (
-        <Badge variant={status === 'active' ? 'default' : 'secondary'}>
-          {status}
-        </Badge>
-      );
+      const status = row.getValue("status") as string;
+      return <Badge variant={status === "active" ? "default" : "secondary"}>{status}</Badge>;
     },
   },
   {
-    id: 'actions',
+    id: "actions",
     cell: ({ row }) => {
       const user = row.original;
       return (
@@ -103,17 +85,11 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user.email)}
-            >
-              Copy email
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.email)}>Copy email</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>View details</DropdownMenuItem>
             <DropdownMenuItem>Edit user</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              Delete user
-            </DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive">Delete user</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
