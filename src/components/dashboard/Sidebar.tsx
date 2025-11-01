@@ -36,7 +36,7 @@ export function DashboardSidebar() {
           {menuItems.map((item) =>
             hasPermission(item.requiredRole as Role) ? (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
+                <Link href={item.href} passHref>
                   <SidebarMenuButton isActive={pathname === item.href} tooltip={{ children: item.label }}>
                     <item.icon />
                     <span>{item.label}</span>

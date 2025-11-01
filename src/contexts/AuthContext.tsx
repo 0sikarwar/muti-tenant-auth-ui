@@ -72,9 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    if (token && refreshToken) {
+    if (refreshToken) {
       try {
-        await api.logout(token, refreshToken);
+        await api.logout();
       } catch (error) {
         console.error("Logout API call failed", error);
       }

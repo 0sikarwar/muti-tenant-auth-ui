@@ -1,28 +1,25 @@
+"use client";
 
-'use client';
-
-import type { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import type { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import type { Tenant } from '@/lib/types';
-import { Checkbox } from '@/components/ui/checkbox';
+} from "@/components/ui/dropdown-menu";
+import type { Tenant } from "@/lib/types";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 export const columns: ColumnDef<Tenant>[] = [
   {
-    id: 'select',
+    id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
@@ -38,27 +35,31 @@ export const columns: ColumnDef<Tenant>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'name',
-    header: 'Name',
+    accessorKey: "id",
+    header: "ID",
+  },
+  {
+    accessorKey: "name",
+    header: "Name",
     cell: ({ row }) => {
       const tenant = row.original;
       return (
         <div className="flex items-center gap-3">
-            <span className="font-medium">{tenant.name}</span>
+          <span className="font-medium">{tenant.name}</span>
         </div>
       );
     },
   },
   {
-    accessorKey: 'description',
-    header: 'Description',
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return <Badge variant={status === "active" ? "default" : "secondary"}>{status}</Badge>;
+    },
   },
   {
-    accessorKey: 'theme.name',
-    header: 'Theme',
-  },
-  {
-    id: 'actions',
+    id: "actions",
     cell: ({ row }) => {
       return (
         <DropdownMenu>
@@ -72,9 +73,7 @@ export const columns: ColumnDef<Tenant>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem>View details</DropdownMenuItem>
             <DropdownMenuItem>Edit tenant</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              Delete tenant
-            </DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive">Delete tenant</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

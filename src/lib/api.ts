@@ -16,7 +16,7 @@ async function fetchFromAPI(path: string, options: RequestInit = {}) {
       headers["x-refresh-token"] = refreshToken;
     }
     if (storedToken) {
-      headers["Authorization"] = storedToken;
+      headers["Authorization"] = `Bearer ${storedToken}`;
     }
   }
 
@@ -85,13 +85,11 @@ export const updateProfile = (data: Partial<User>, token: string): Promise<User>
     body: JSON.stringify(data),
   });
 
-export const logout = (token: string, refreshToken: string) =>
+export const logout = () =>
   fetchFromAPI("/auth/logout", {
     method: "POST",
-    body: JSON.stringify({ refreshToken }),
   });
 
-export const getUsers = (tenantId: string, token: string): Promise<User[]> =>
-  fetchFromAPI(`/users?tenant_id=${tenantId}`);
+export const getUsers = (): Promise<User[]> => fetchFromAPI(`/users`);
 
 export const getUserById = (id: string, token: string): Promise<User> => fetchFromAPI(`/users/${id}`);
