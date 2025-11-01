@@ -12,11 +12,12 @@ async function fetchFromAPI(path: string, options: RequestInit = {}) {
   if (typeof window !== "undefined") {
     const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-    if (refreshToken) {
-      headers["x-refresh-token"] = refreshToken;
-    }
+
     if (storedToken) {
       headers["Authorization"] = `Bearer ${storedToken}`;
+    }
+    if (refreshToken) {
+      headers["x-refresh-token"] = refreshToken;
     }
   }
 
@@ -44,17 +45,33 @@ async function fetchFromAPI(path: string, options: RequestInit = {}) {
     throw new Error(errorData.message || "An API error occurred");
   }
 
+  if (response.status === 204) {
+    return null;
+  }
+
   return response.json();
 }
 
+// Tenant API
 export const getTenants = (): Promise<Tenant[]> => fetchFromAPI("/tenants");
 export const getTenantById = (id: string): Promise<Tenant> => fetchFromAPI(`/tenants/${id}`);
-export const createTenant = (name: string, token: string): Promise<Tenant> =>
+export const createTenant = (data: Partial<Tenant>): Promise<Tenant> =>
   fetchFromAPI("/tenants", {
     method: "POST",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify(data),
+  });
+export const updateTenant = (id: string, data: Partial<Tenant>): Promise<Tenant> =>
+  fetchFromAPI(`/tenants/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+export const deleteTenant = (id: string): Promise<void> =>
+  fetchFromAPI(`/tenants/${id}`, {
+    method: "DELETE",
   });
 
+
+// Auth API
 export const login = (email: string, password: string) =>
   fetchFromAPI("/auth/login", {
     method: "POST",
@@ -79,17 +96,28 @@ export const resetPassword = (token: string, password: string) =>
     body: JSON.stringify({ token, password }),
   });
 
-export const updateProfile = (data: Partial<User>, token: string): Promise<User> =>
+export const updateProfile = (data: Partial<User>): Promise<User> =>
   fetchFromAPI("/auth/update-profile", {
     method: "PUT",
     body: JSON.stringify(data),
   });
 
-export const logout = () =>
+export const logout = (refreshToken: string) =>
   fetchFromAPI("/auth/logout", {
     method: "POST",
+    body: JSON.stringify({ refreshToken }),
   });
 
-export const getUsers = (): Promise<User[]> => fetchFromAPI(`/users`);
 
-export const getUserById = (id: string, token: string): Promise<User> => fetchFromAPI(`/users/${id}`);
+// User API
+export const getUsers = (): Promise<User[]> => fetchFromAPI(`/users`);
+export const getUserById = (id: string): Promise<User> => fetchFromAPI(`/users/${id}`);
+export const updateUser = (id: string, data: Partial<User>): Promise<User> =>
+  fetchFromAPI(`/users/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+export const deleteUser = (id: string): Promise<void> =>
+    fetchFromAPI(`/users/${id}`, {
+        method: 'DELETE',
+    });

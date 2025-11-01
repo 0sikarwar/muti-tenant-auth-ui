@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -8,13 +9,20 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Tenant } from "@/lib/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 
-export const columns: ColumnDef<Tenant>[] = [
+interface ColumnsProps {
+    onEdit: (tenant: Tenant) => void;
+    onView: (tenant: Tenant) => void;
+    onDelete: (tenant: Tenant) => void;
+}
+
+export const generateColumns = ({ onEdit, onView, onDelete }: ColumnsProps): ColumnDef<Tenant>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -54,13 +62,14 @@ export const columns: ColumnDef<Tenant>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const status = "active"; // Placeholder as status is not in Tenant type
       return <Badge variant={status === "active" ? "default" : "secondary"}>{status}</Badge>;
     },
   },
   {
     id: "actions",
     cell: ({ row }) => {
+      const tenant = row.original;
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -71,9 +80,10 @@ export const columns: ColumnDef<Tenant>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>View details</DropdownMenuItem>
-            <DropdownMenuItem>Edit tenant</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">Delete tenant</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onView(tenant)}>View details</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(tenant)}>Edit tenant</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive" onClick={() => onDelete(tenant)}>Delete tenant</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

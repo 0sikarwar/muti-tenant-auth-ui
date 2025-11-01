@@ -1,3 +1,4 @@
+
 export type Role = "admin" | "manager" | "user";
 
 export interface User {
@@ -32,4 +33,5 @@ export interface Tenant {
   logoUrl?: string;
   description: string;
   theme: Theme;
+  status?: "active" | "inactive";
 }

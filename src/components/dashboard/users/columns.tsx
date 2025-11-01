@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -16,7 +17,13 @@ import type { User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export const columns: ColumnDef<User>[] = [
+interface ColumnsProps {
+    onEdit: (user: User) => void;
+    onView: (user: User) => void;
+    onDelete: (user: User) => void;
+}
+
+export const generateColumns = ({ onEdit, onView, onDelete }: ColumnsProps): ColumnDef<User>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -85,11 +92,10 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.email)}>Copy email</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onView(user)}>View details</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onEdit(user)}>Edit user</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View details</DropdownMenuItem>
-            <DropdownMenuItem>Edit user</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">Delete user</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={() => onDelete(user)}>Delete user</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
