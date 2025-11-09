@@ -70,7 +70,6 @@ export const deleteTenant = (id: string): Promise<void> =>
     method: "DELETE",
   });
 
-
 // Auth API
 export const login = (email: string, password: string) =>
   fetchFromAPI("/auth/login", {
@@ -102,12 +101,10 @@ export const updateProfile = (data: Partial<User>): Promise<User> =>
     body: JSON.stringify(data),
   });
 
-export const logout = (refreshToken: string) =>
+export const logout = () =>
   fetchFromAPI("/auth/logout", {
     method: "POST",
-    body: JSON.stringify({ refreshToken }),
   });
-
 
 // User API
 export const getUsers = (): Promise<User[]> => fetchFromAPI(`/users`);
@@ -118,6 +115,6 @@ export const updateUser = (id: string, data: Partial<User>): Promise<User> =>
     body: JSON.stringify(data),
   });
 export const deleteUser = (id: string): Promise<void> =>
-    fetchFromAPI(`/users/${id}`, {
-        method: 'DELETE',
-    });
+  fetchFromAPI(`/users/${id}`, {
+    method: "DELETE",
+  });

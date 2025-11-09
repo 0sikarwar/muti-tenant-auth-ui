@@ -1,10 +1,9 @@
+"use client";
 
-'use client';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
-import { Button } from '@/components/ui/button';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,22 +11,15 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { tenantManagementSchema } from '@/lib/validation';
-import type { Tenant } from '@/lib/types';
-import * as api from '@/lib/api';
-import { useEffect } from 'react';
+} from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { tenantManagementSchema } from "@/lib/validation";
+import type { Tenant } from "@/lib/types";
+import * as api from "@/lib/api";
+import { useEffect } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EditTenantDialogProps {
   tenant: Tenant | null;
@@ -43,8 +35,8 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
   const form = useForm<z.infer<typeof tenantManagementSchema>>({
     resolver: zodResolver(tenantManagementSchema),
     defaultValues: {
-      name: '',
-      description: '',
+      name: "",
+      status: "active",
     },
   });
 
@@ -52,12 +44,12 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
     if (tenant) {
       form.reset({
         name: tenant.name,
-        description: tenant.description,
+        status: tenant.status,
       });
     } else {
       form.reset({
-        name: '',
-        description: '',
+        name: "",
+        status: "active",
       });
     }
   }, [tenant, form]);
@@ -66,18 +58,18 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
     try {
       if (isEditMode && tenant) {
         await api.updateTenant(tenant.id, values);
-        toast({ title: 'Tenant Updated', description: 'The tenant details have been saved.' });
+        toast({ title: "Tenant Updated", description: "The tenant details have been saved." });
       } else {
-        await api.createTenant(values);
-        toast({ title: 'Tenant Created', description: 'The new tenant has been added.' });
+        await api.createTenant({ name: values.name });
+        toast({ title: "Tenant Created", description: "The new tenant has been added." });
       }
       onTenantUpdated();
       onOpenChange(false);
     } catch (error) {
       toast({
-        variant: 'destructive',
-        title: isEditMode ? 'Update Failed' : 'Creation Failed',
-        description: `Could not ${isEditMode ? 'update' : 'create'} tenant.`,
+        variant: "destructive",
+        title: isEditMode ? "Update Failed" : "Creation Failed",
+        description: `Could not ${isEditMode ? "update" : "create"} tenant.`,
       });
     }
   }
@@ -86,9 +78,9 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Tenant' : 'Add New Tenant'}</DialogTitle>
+          <DialogTitle>{isEditMode ? "Edit Tenant" : "Add New Tenant"}</DialogTitle>
           <DialogDescription>
-            {isEditMode ? "Make changes to the tenant's information." : 'Enter the details for the new tenant.'}
+            {isEditMode ? "Make changes to the tenant's information." : "Enter the details for the new tenant."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -106,19 +98,29 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isEditMode && (
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <DialogFooter>
               <Button type="submit">Save changes</Button>
             </DialogFooter>

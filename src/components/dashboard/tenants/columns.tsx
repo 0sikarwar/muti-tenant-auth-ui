@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -17,9 +16,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 
 interface ColumnsProps {
-    onEdit: (tenant: Tenant) => void;
-    onView: (tenant: Tenant) => void;
-    onDelete: (tenant: Tenant) => void;
+  onEdit: (tenant: Tenant) => void;
+  onView: (tenant: Tenant) => void;
+  onDelete: (tenant: Tenant) => void;
 }
 
 export const generateColumns = ({ onEdit, onView, onDelete }: ColumnsProps): ColumnDef<Tenant>[] => [
@@ -62,7 +61,7 @@ export const generateColumns = ({ onEdit, onView, onDelete }: ColumnsProps): Col
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = "active"; // Placeholder as status is not in Tenant type
+      const status = row.original.status;
       return <Badge variant={status === "active" ? "default" : "secondary"}>{status}</Badge>;
     },
   },
@@ -83,7 +82,9 @@ export const generateColumns = ({ onEdit, onView, onDelete }: ColumnsProps): Col
             <DropdownMenuItem onClick={() => onView(tenant)}>View details</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(tenant)}>Edit tenant</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={() => onDelete(tenant)}>Delete tenant</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={() => onDelete(tenant)}>
+              Delete tenant
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
