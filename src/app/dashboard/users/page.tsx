@@ -1,11 +1,10 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { UserTable } from "@/components/dashboard/users/UserTable";
 import { useAuth } from "@/hooks/useAuth";
-import type { User } from "@/lib/types";
+import type { Tenant, User } from "@/lib/types";
 import { useEffect, useMemo, useState } from "react";
 import * as api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +14,7 @@ import { ViewUserDialog } from "@/components/dashboard/users/ViewUserDialog";
 
 export default function UserManagementPage() {
   const { user, hasPermission } = useAuth();
+  const [tenants, setTenants] = useState<Tenant[]>([]);
   const { toast } = useToast();
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -25,6 +25,7 @@ export default function UserManagementPage() {
 
   const fetchUsers = () => {
     api.getUsers().then(setAllUsers).catch(console.error);
+    api.getTenants().then(setTenants).catch(console.error);
   };
 
   useEffect(() => {
@@ -75,7 +76,7 @@ export default function UserManagementPage() {
   const handleAddUser = () => {
     setSelectedUser(null);
     setAddOpen(true);
-  }
+  };
 
   return (
     <div className="space-y-8">
@@ -89,7 +90,13 @@ export default function UserManagementPage() {
           Add User
         </Button>
       </div>
-      <UserTable data={visibleUsers} onEdit={handleEdit} onView={handleView} onDelete={handleDelete} />
+      <UserTable
+        data={visibleUsers}
+        onEdit={handleEdit}
+        onView={handleView}
+        onDelete={handleDelete}
+        tenants={tenants}
+      />
 
       {selectedUser && (
         <>
@@ -107,14 +114,14 @@ export default function UserManagementPage() {
       <EditUserDialog
         user={selectedUser}
         isOpen={isAddOpen || isEditOpen}
+        tenants={tenants}
         onOpenChange={isAddOpen ? setAddOpen : setEditOpen}
         onUserUpdated={() => {
-            fetchUsers();
-            if(isAddOpen) setAddOpen(false);
-            if(isEditOpen) setEditOpen(false);
+          fetchUsers();
+          if (isAddOpen) setAddOpen(false);
+          if (isEditOpen) setEditOpen(false);
         }}
-        />
-
+      />
     </div>
   );
 }

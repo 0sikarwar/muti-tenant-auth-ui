@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -13,17 +12,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import type { User } from "@/lib/types";
+import type { Tenant, User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface ColumnsProps {
-    onEdit: (user: User) => void;
-    onView: (user: User) => void;
-    onDelete: (user: User) => void;
+  onEdit: (user: User) => void;
+  onView: (user: User) => void;
+  onDelete: (user: User) => void;
+  tenants: Tenant[];
 }
 
-export const generateColumns = ({ onEdit, onView, onDelete }: ColumnsProps): ColumnDef<User>[] => [
+export const generateColumns = ({ onEdit, onView, onDelete, tenants }: ColumnsProps): ColumnDef<User>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -71,6 +71,15 @@ export const generateColumns = ({ onEdit, onView, onDelete }: ColumnsProps): Col
     header: "Role",
   },
   {
+    accessorKey: "tenant",
+    header: "Tenant",
+    cell: ({ row }) => {
+      const id = row.original.tenantId;
+      const tenant = tenants.find((t) => t.id === id);
+      return tenant ? tenant.name : "N/A";
+    },
+  },
+  {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
@@ -95,7 +104,9 @@ export const generateColumns = ({ onEdit, onView, onDelete }: ColumnsProps): Col
             <DropdownMenuItem onClick={() => onView(user)}>View details</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(user)}>Edit user</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={() => onDelete(user)}>Delete user</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={() => onDelete(user)}>
+              Delete user
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

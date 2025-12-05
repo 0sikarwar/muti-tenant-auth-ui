@@ -1,86 +1,81 @@
+"use client";
 
-'use client';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { useAuth } from '@/hooks/useAuth';
-import { profileSchema } from '@/lib/validation';
-import { useToast } from '@/hooks/use-toast';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Upload } from 'lucide-react';
-import * as api from '@/lib/api';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
+import { profileSchema } from "@/lib/validation";
+import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Upload } from "lucide-react";
+import * as api from "@/lib/api";
+import { useEffect } from "react";
 
 export default function ProfilePage() {
-  const { user, token } = useAuth();
+  const { user, token, refreshAccessToken } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: user?.name || '',
-      email: user?.email || '',
-      phone: user?.phone || '',
-      address: user?.address || '',
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      address: user?.address || "",
     },
   });
+
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        address: user.address || "",
+      });
+    }
+  }, [user, form]);
 
   async function onSubmit(values: z.infer<typeof profileSchema>) {
     if (!user || !token) return;
     try {
-        await api.updateProfile(values, token);
-        toast({
-            title: 'Profile Updated',
-            description: 'Your personal information has been saved.',
-        });
-    } catch (error) {
-        toast({
-            variant: 'destructive',
-            title: 'Update Failed',
-            description: 'Could not update your profile.',
-        });
+      await api.updateProfile(values);
+      await refreshAccessToken();
+      toast({
+        title: "Profile Updated",
+        description: "Your personal information has been saved.",
+      });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Could not update your profile.";
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: errorMessage,
+      });
     }
   }
 
   const userInitials = user?.name
-    .split(' ')
+    .split(" ")
     .map((n) => n[0])
-    .join('');
+    .join("");
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight font-headline">Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your personal information and account settings.
-        </p>
+        <p className="text-muted-foreground">Manage your personal information and account settings.</p>
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card>
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
-              <CardDescription>
-                Update your name, email, and other personal details.
-              </CardDescription>
+              <CardDescription>Update your name, email, and other personal details.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-4">

@@ -1,5 +1,5 @@
 import { REFRESH_TOKEN_STORAGE_KEY, TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from "@/contexts/AuthContext";
-import type { Tenant, User } from "./types";
+import type { Role, Tenant, User } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -77,10 +77,10 @@ export const login = (email: string, password: string) =>
     body: JSON.stringify({ email, password }),
   });
 
-export const register = (name: string, email: string, password: string) =>
+export const register = (name: string, email: string, password: string, role: Role = "user", tenantId?: string) =>
   fetchFromAPI("/auth/register", {
     method: "POST",
-    body: JSON.stringify({ name, email, password, role: "user" }),
+    body: JSON.stringify({ name, email, password, role, tenantId }),
   });
 
 export const forgotPassword = (email: string) =>
@@ -99,6 +99,11 @@ export const updateProfile = (data: Partial<User>): Promise<User> =>
   fetchFromAPI("/auth/update-profile", {
     method: "PUT",
     body: JSON.stringify(data),
+  });
+
+export const refreshToken = () =>
+  fetchFromAPI("/auth/refresh-token", {
+    method: "POST",
   });
 
 export const logout = () =>

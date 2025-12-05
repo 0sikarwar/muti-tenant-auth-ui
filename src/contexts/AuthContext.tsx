@@ -16,6 +16,7 @@ interface AuthContextType {
   loading: boolean;
   token: string | null;
   refreshToken: string | null;
+  refreshAccessToken: () => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -53,7 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const resp = await api.login(email, password);
-      console.log("resp", resp);
       const { user: loggedInUser, accessToken, refreshToken: refToken } = resp;
       if (loggedInUser && accessToken) {
         setUser(loggedInUser);
@@ -88,6 +88,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   };
 
+  const refreshAccessToken = async (): Promise<boolean> => {
+    if (!refreshToken) {
+      console.warn("No refresh token available. Cannot refresh access token.");
+      return false;
+    }
+    try {
+      const resp = await api.refreshToken();
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken, user: refreshedUser } = resp;
+
+      if (newAccessToken && newRefreshToken && refreshedUser) {
+        setUser(refreshedUser);
+        setToken(newAccessToken);
+        setRefreshToken(newRefreshToken);
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(refreshedUser));
+        localStorage.setItem(TOKEN_STORAGE_KEY, newAccessToken);
+        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, newRefreshToken);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Failed to refresh access token", error);
+      logout(); // Force logout on refresh token failure
+      return false;
+    }
+  };
+
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
       const { user: newUser, accessToken, refreshToken: refToken } = await api.register(name, email, password);
@@ -119,7 +145,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, login, logout, register, hasPermission, loading, token, refreshToken }}
+      value={{
+        user,
+        isAuthenticated: !!user,
+        login,
+        logout,
+        register,
+        hasPermission,
+        loading,
+        token,
+        refreshToken,
+        refreshAccessToken,
+      }}
     >
       {children}
     </AuthContext.Provider>
