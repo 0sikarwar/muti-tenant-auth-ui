@@ -1,52 +1,48 @@
-'use client';
+"use client";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import type { z } from 'zod';
-import Link from 'next/link';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { forgotPasswordSchema } from '@/lib/validation';
-import { useToast } from '@/hooks/use-toast';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import Link from "next/link";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { forgotPasswordSchema } from "@/lib/validation";
+import { useToast } from "@/hooks/use-toast";
+import { forgotPassword } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof forgotPasswordSchema>>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
-      email: '',
+      email: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof forgotPasswordSchema>) {
-    console.log(values);
-    toast({
-      title: 'Password Reset Email Sent',
-      description: `If an account exists for ${values.email}, you will receive a password reset link.`,
-    });
+  async function onSubmit(values: z.infer<typeof forgotPasswordSchema>) {
+    try {
+      const resp = await forgotPassword(values.email);
+      toast({
+        title: "Password Reset Email Sent",
+        description: `If an account exists for ${values.email}, you will receive a password reset link.`,
+      });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send reset email.";
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: errorMessage,
+      });
+    }
   }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Forgot Password</CardTitle>
-        <CardDescription>
-          Enter your email and we&apos;ll send you a link to reset your password.
-        </CardDescription>
+        <CardDescription>Enter your email and we&apos;ll send you a link to reset your password.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -68,7 +64,7 @@ export default function ForgotPasswordPage() {
               Send Reset Link
             </Button>
             <div className="mt-4 text-center text-sm">
-              Remember your password?{' '}
+              Remember your password?{" "}
               <Link href="/login" className="underline">
                 Login
               </Link>
