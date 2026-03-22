@@ -1,5 +1,17 @@
 export type Role = "admin" | "manager" | "user";
 
+export interface Permission {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface RoleDefinition {
+  id: string;
+  name: string;
+  permissionIds?: string[];
+}
+
 export interface User {
   id: string;
   name: string;

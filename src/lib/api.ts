@@ -1,5 +1,5 @@
 import { REFRESH_TOKEN_STORAGE_KEY, TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from "@/contexts/AuthContext";
-import type { Role, Tenant, User } from "./types";
+import type { Role, Tenant, User, RoleDefinition, Permission } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -122,4 +122,51 @@ export const updateUser = (id: string, data: Partial<User>): Promise<User> =>
 export const deleteUser = (id: string): Promise<void> =>
   fetchFromAPI(`/users/${id}`, {
     method: "DELETE",
+  });
+
+// Role API
+export const getRoles = (): Promise<RoleDefinition[]> => fetchFromAPI("/roles/roles");
+export const createRole = (data: Partial<RoleDefinition>): Promise<RoleDefinition> =>
+  fetchFromAPI("/roles/roles", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+export const updateRole = (id: string, data: Partial<RoleDefinition>): Promise<RoleDefinition> =>
+  fetchFromAPI(`/roles/roles/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+export const deleteRole = (id: string): Promise<void> =>
+  fetchFromAPI(`/roles/roles/${id}`, {
+    method: "DELETE",
+  });
+
+// Permission API
+export const getPermissions = (): Promise<Permission[]> => fetchFromAPI("/roles/permissions");
+export const createPermission = (data: Partial<Permission>): Promise<Permission> =>
+  fetchFromAPI("/roles/permissions", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+export const updatePermission = (id: string, data: Partial<Permission>): Promise<Permission> =>
+  fetchFromAPI(`/roles/permissions/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+export const deletePermission = (id: string): Promise<void> =>
+  fetchFromAPI(`/roles/permissions/${id}`, {
+    method: "DELETE",
+  });
+
+// Role-Permission Assignment
+export const assignPermissionToRole = (roleId: string, permissionId: string): Promise<void> =>
+  fetchFromAPI("/roles/roles/assign-permission", {
+    method: "POST",
+    body: JSON.stringify({ roleId, permissionId }),
+  });
+
+export const removePermissionFromRole = (roleId: string, permissionId: string): Promise<void> =>
+  fetchFromAPI("/roles/roles/remove-permission", {
+    method: "POST",
+    body: JSON.stringify({ roleId, permissionId }),
   });

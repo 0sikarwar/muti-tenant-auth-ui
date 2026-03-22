@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Building, LayoutDashboard, UserCircle } from "lucide-react";
+import { Users, Building, LayoutDashboard, UserCircle, ShieldCheck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +20,7 @@ const menuItems = [
   { href: "/dashboard/profile", label: "Profile", icon: UserCircle, requiredRole: "user" },
   { href: "/dashboard/users", label: "User Management", icon: Users, requiredRole: "manager" },
   { href: "/dashboard/tenants", label: "Tenant Management", icon: Building, requiredRole: "admin" },
+  { href: "/dashboard/roles", label: "Roles & Permissions", icon: ShieldCheck, requiredRole: "admin" },
 ];
 
 export function DashboardSidebar() {
