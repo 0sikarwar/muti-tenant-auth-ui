@@ -20,6 +20,7 @@ export default function TenantManagementPage() {
   const [isEditOpen, setEditOpen] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [isAddOpen, setAddOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchTenants = () => {
     api.getTenants().then(setTenants).catch(console.error);
@@ -46,15 +47,17 @@ export default function TenantManagementPage() {
 
   const confirmDelete = async () => {
     if (selectedTenant) {
+      setIsDeleting(true);
       try {
         await api.deleteTenant(selectedTenant.id);
         toast({ title: "Tenant Deleted", description: `Tenant ${selectedTenant.name} has been deleted.` });
         fetchTenants();
+        setDeleteOpen(false);
+        setSelectedTenant(null);
       } catch (error) {
         toast({ variant: "destructive", title: "Deletion Failed", description: "Could not delete tenant." });
       } finally {
-        setDeleteOpen(false);
-        setSelectedTenant(null);
+        setIsDeleting(false);
       }
     }
   };
@@ -89,6 +92,7 @@ export default function TenantManagementPage() {
             onConfirm={confirmDelete}
             title="Are you sure you want to delete this tenant?"
             description="This action cannot be undone. This will permanently delete the tenant and all associated data."
+            isLoading={isDeleting}
           />
         </>
       )}

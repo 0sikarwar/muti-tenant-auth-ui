@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { tenantManagementSchema } from "@/lib/validation";
 import type { Tenant } from "@/lib/types";
 import * as api from "@/lib/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EditTenantDialogProps {
@@ -30,6 +30,7 @@ interface EditTenantDialogProps {
 
 export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated }: EditTenantDialogProps) {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const isEditMode = !!tenant;
 
   const form = useForm<z.infer<typeof tenantManagementSchema>>({
@@ -55,6 +56,7 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
   }, [tenant, form]);
 
   async function onSubmit(values: z.infer<typeof tenantManagementSchema>) {
+    setIsLoading(true);
     try {
       if (isEditMode && tenant) {
         await api.updateTenant(tenant.id, values);
@@ -71,6 +73,8 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
         title: isEditMode ? "Update Failed" : "Creation Failed",
         description: `Could not ${isEditMode ? "update" : "create"} tenant.`,
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -92,7 +96,7 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
                 <FormItem>
                   <FormLabel>Tenant Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -105,7 +109,7 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a status" />
@@ -122,7 +126,9 @@ export function EditTenantDialog({ tenant, isOpen, onOpenChange, onTenantUpdated
               />
             )}
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save changes"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

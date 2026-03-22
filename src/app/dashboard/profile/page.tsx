@@ -13,11 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload } from "lucide-react";
 import * as api from "@/lib/api";
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
   const { user, token, refreshAccessToken } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -42,6 +44,7 @@ export default function ProfilePage() {
 
   async function onSubmit(values: z.infer<typeof profileSchema>) {
     if (!user || !token) return;
+    setIsLoading(true);
     try {
       await api.updateProfile(values);
       await refreshAccessToken();
@@ -56,6 +59,8 @@ export default function ProfilePage() {
         title: "Update Failed",
         description: errorMessage,
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -83,7 +88,7 @@ export default function ProfilePage() {
                   {user?.profile_image_url && <AvatarImage src={user.profile_image_url} alt={user?.name} />}
                   <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
                 </Avatar>
-                <Button type="button" variant="outline">
+                <Button type="button" variant="outline" disabled={isLoading}>
                   <Upload className="mr-2 h-4 w-4" />
                   Upload Picture
                 </Button>
@@ -96,7 +101,7 @@ export default function ProfilePage() {
                     <FormItem>
                       <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your full name" {...field} />
+                        <Input placeholder="Your full name" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -109,7 +114,7 @@ export default function ProfilePage() {
                     <FormItem>
                       <FormLabel>Email Address</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="your@email.com" {...field} />
+                        <Input type="email" placeholder="your@email.com" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -122,7 +127,7 @@ export default function ProfilePage() {
                     <FormItem>
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="(123) 456-7890" {...field} />
+                        <Input placeholder="(123) 456-7890" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -135,7 +140,7 @@ export default function ProfilePage() {
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="123 Main St, Anytown USA" {...field} />
+                        <Input placeholder="123 Main St, Anytown USA" {...field} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -144,7 +149,9 @@ export default function ProfilePage() {
               </div>
             </CardContent>
             <CardFooter className="border-t px-6 py-4">
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Changes"}
+              </Button>
             </CardFooter>
           </Card>
         </form>

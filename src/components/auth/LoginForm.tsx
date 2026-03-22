@@ -13,10 +13,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { loginSchema } from "@/lib/validation";
 import { useToast } from "@/hooks/use-toast";
 
+import { useState } from "react";
+
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -27,7 +30,9 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
+    setIsLoading(true);
     const success = await login(values.email, values.password);
+    setIsLoading(false);
     if (success) {
       toast({
         title: "Login Successful",
@@ -53,7 +58,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="name@example.com" {...field} />
+                <Input placeholder="name@example.com" {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -66,15 +71,15 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div className="flex items-center justify-between">
-          <Button type="submit" className="w-full">
-            Login
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Login"}
           </Button>
         </div>
         <div className="mt-4 text-center text-sm">

@@ -12,8 +12,11 @@ import { forgotPasswordSchema } from "@/lib/validation";
 import { useToast } from "@/hooks/use-toast";
 import { forgotPassword } from "@/lib/api";
 
+import { useState } from "react";
+
 export default function ForgotPasswordPage() {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof forgotPasswordSchema>>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
@@ -22,8 +25,9 @@ export default function ForgotPasswordPage() {
   });
 
   async function onSubmit(values: z.infer<typeof forgotPasswordSchema>) {
+    setIsLoading(true);
     try {
-      const resp = await forgotPassword(values.email);
+      await forgotPassword(values.email);
       toast({
         title: "Password Reset Email Sent",
         description: `If an account exists for ${values.email}, you will receive a password reset link.`,
@@ -35,6 +39,8 @@ export default function ForgotPasswordPage() {
         title: "Error",
         description: errorMessage,
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -54,14 +60,14 @@ export default function ForgotPasswordPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <Input placeholder="name@example.com" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Send Reset Link
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Sending..." : "Send Reset Link"}
             </Button>
             <div className="mt-4 text-center text-sm">
               Remember your password?{" "}

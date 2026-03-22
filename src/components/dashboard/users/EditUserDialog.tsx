@@ -31,6 +31,7 @@ interface EditUserDialogProps {
 
 export function EditUserDialog({ user, isOpen, onOpenChange, onUserUpdated, tenants }: EditUserDialogProps) {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const isEditMode = !!user;
 
   const form = useForm<z.infer<typeof userManagementSchema>>({
@@ -65,6 +66,7 @@ export function EditUserDialog({ user, isOpen, onOpenChange, onUserUpdated, tena
   }, [user, form]);
 
   async function onSubmit(values: z.infer<typeof userManagementSchema>) {
+    setIsLoading(true);
     try {
       if (isEditMode && user) {
         await api.updateUser(user.id, values);
@@ -81,6 +83,8 @@ export function EditUserDialog({ user, isOpen, onOpenChange, onUserUpdated, tena
         title: isEditMode ? "Update Failed" : "Creation Failed",
         description: `Could not ${isEditMode ? "update" : "create"} user.`,
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -102,7 +106,7 @@ export function EditUserDialog({ user, isOpen, onOpenChange, onUserUpdated, tena
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -115,7 +119,7 @@ export function EditUserDialog({ user, isOpen, onOpenChange, onUserUpdated, tena
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} />
+                    <Input type="email" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,7 +131,7 @@ export function EditUserDialog({ user, isOpen, onOpenChange, onUserUpdated, tena
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a role" />
@@ -152,7 +156,7 @@ export function EditUserDialog({ user, isOpen, onOpenChange, onUserUpdated, tena
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a status" />
@@ -174,7 +178,7 @@ export function EditUserDialog({ user, isOpen, onOpenChange, onUserUpdated, tena
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tenant</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a tenant" />
@@ -193,7 +197,9 @@ export function EditUserDialog({ user, isOpen, onOpenChange, onUserUpdated, tena
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save changes"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

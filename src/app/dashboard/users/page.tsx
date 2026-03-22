@@ -22,6 +22,7 @@ export default function UserManagementPage() {
   const [isEditOpen, setEditOpen] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [isAddOpen, setAddOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchUsers = () => {
     api.getUsers().then(setAllUsers).catch(console.error);
@@ -60,15 +61,17 @@ export default function UserManagementPage() {
 
   const confirmDelete = async () => {
     if (selectedUser) {
+      setIsDeleting(true);
       try {
         await api.deleteUser(selectedUser.id);
         toast({ title: "User Deleted", description: `User ${selectedUser.name} has been deleted.` });
         fetchUsers();
+        setDeleteOpen(false);
+        setSelectedUser(null);
       } catch (error) {
         toast({ variant: "destructive", title: "Deletion Failed", description: "Could not delete user." });
       } finally {
-        setDeleteOpen(false);
-        setSelectedUser(null);
+        setIsDeleting(false);
       }
     }
   };
@@ -107,6 +110,7 @@ export default function UserManagementPage() {
             onConfirm={confirmDelete}
             title="Are you sure you want to delete this user?"
             description="This action cannot be undone. This will permanently delete the user's account and remove their data from our servers."
+            isLoading={isDeleting}
           />
         </>
       )}
