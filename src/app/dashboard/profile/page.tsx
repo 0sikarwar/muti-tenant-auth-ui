@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { profileSchema } from "@/lib/validation";
@@ -25,9 +25,9 @@ export default function ProfilePage() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: user?.name || "",
-      email: user?.email || "",
       phone: user?.phone || "",
       address: user?.address || "",
+      password: "",
     },
   });
 
@@ -35,9 +35,9 @@ export default function ProfilePage() {
     if (user) {
       form.reset({
         name: user.name,
-        email: user.email,
         phone: user.phone || "",
         address: user.address || "",
+        password: "",
       });
     }
   }, [user, form]);
@@ -46,12 +46,17 @@ export default function ProfilePage() {
     if (!user || !token) return;
     setIsLoading(true);
     try {
-      await api.updateProfile(values);
+      const updateData: any = { ...values };
+      if (!updateData.password) {
+        delete updateData.password;
+      }
+      await api.updateProfile(updateData);
       await refreshAccessToken();
       toast({
         title: "Profile Updated",
         description: "Your personal information has been saved.",
       });
+      form.setValue("password", "");
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Could not update your profile.";
       toast({
@@ -80,19 +85,24 @@ export default function ProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
-              <CardDescription>Update your name, email, and other personal details.</CardDescription>
+              <CardDescription>Update your name, password, and other personal details.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <Avatar className="h-20 w-20">
                   {user?.profile_image_url && <AvatarImage src={user.profile_image_url} alt={user?.name} />}
                   <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
                 </Avatar>
-                <Button type="button" variant="outline" disabled={isLoading}>
+                <div>
+                  <h3 className="text-lg font-semibold">{user?.name}</h3>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                </div>
+                <Button type="button" variant="outline" disabled={isLoading} className="ml-auto">
                   <Upload className="mr-2 h-4 w-4" />
                   Upload Picture
                 </Button>
               </div>
+
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <FormField
                   control={form.control}
@@ -107,19 +117,28 @@ export default function ProfilePage() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email Address</FormLabel>
+                      <FormLabel>New Password</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="your@email.com" {...field} disabled={isLoading} />
+                        <Input
+                          type="password"
+                          placeholder="Enter new password"
+                          {...field}
+                          disabled={isLoading}
+                          autoComplete="new-password"
+                        />
                       </FormControl>
+                      <FormDescription className="text-xs">Leave blank to keep current password.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="phone"
